@@ -1,12 +1,6 @@
 package org.littleshoot.proxy;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-import org.apache.commons.cli.PosixParser;
-import org.apache.commons.cli.UnrecognizedOptionException;
+import org.apache.commons.cli.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.xml.DOMConfigurator;
 import org.littleshoot.proxy.extras.SelfSignedMitmManager;
@@ -38,34 +32,28 @@ public class Launcher {
 
     /**
      * Starts the proxy from the command line.
-     * 
-     * @param args
-     *            Any command line arguments.
+     *
+     * @param args Any command line arguments.
      */
     public static void main(final String... args) {
         pollLog4JConfigurationFileIfAvailable();
         LOG.info("Running LittleProxy with args: {}", Arrays.asList(args));
         final Options options = new Options();
-        options.addOption(null, OPTION_DNSSEC, true,
-                "Request and verify DNSSEC signatures.");
+        options.addOption(null, OPTION_DNSSEC, true, "Request and verify DNSSEC signatures.");
         options.addOption(null, OPTION_PORT, true, "Run on the specified port.");
         options.addOption(null, OPTION_NIC, true, "Run on a specified Nic");
-        options.addOption(null, OPTION_HELP, false,
-                "Display command line help.");
+        options.addOption(null, OPTION_HELP, false, "Display command line help.");
         options.addOption(null, OPTION_MITM, false, "Run as man in the middle.");
-        
+
         final CommandLineParser parser = new PosixParser();
         final CommandLine cmd;
         try {
             cmd = parser.parse(options, args);
             if (cmd.getArgs().length > 0) {
-                throw new UnrecognizedOptionException(
-                        "Extra arguments were provided in "
-                                + Arrays.asList(args));
+                throw new UnrecognizedOptionException("Extra arguments were provided in " + Arrays.asList(args));
             }
         } catch (final ParseException e) {
-            printHelp(options,
-                    "Could not parse command line: " + Arrays.asList(args));
+            printHelp(options, "Could not parse command line: " + Arrays.asList(args));
             return;
         }
         if (cmd.hasOption(OPTION_HELP)) {
@@ -86,23 +74,18 @@ public class Launcher {
             port = defaultPort;
         }
 
-
         System.out.println("About to start server on port: " + port);
-        HttpProxyServerBootstrap bootstrap = DefaultHttpProxyServer
-                .bootstrapFromFile("./littleproxy.properties")
-                .withPort(port)
-                .withAllowLocalOnly(false);
+        HttpProxyServerBootstrap bootstrap = DefaultHttpProxyServer.bootstrapFromFile("./littleproxy.properties")
+                        .withPort(port).withAllowLocalOnly(false);
 
         if (cmd.hasOption(OPTION_NIC)) {
             final String val = cmd.getOptionValue(OPTION_NIC);
             bootstrap.withNetworkInterface(new InetSocketAddress(val, 0));
         }
 
-        if (cmd.hasOption(OPTION_MITM)) {
-            LOG.info("Running as Man in the Middle");
-            bootstrap.withManInTheMiddle(new SelfSignedMitmManager());
-        }
-        
+        System.out.println("Running as Man in the Middle");
+        bootstrap.withManInTheMiddle(new SelfSignedMitmManager());
+
         if (cmd.hasOption(OPTION_DNSSEC)) {
             final String val = cmd.getOptionValue(OPTION_DNSSEC);
             if (ProxyUtils.isTrue(val)) {
@@ -112,18 +95,29 @@ public class Launcher {
                 LOG.info("Not using DNSSEC");
                 bootstrap.withUseDnsSec(false);
             } else {
-                printHelp(options, "Unexpected value for " + OPTION_DNSSEC
-                        + "=:" + val);
+                printHelp(options, "Unexpected value for " + OPTION_DNSSEC + "=:" + val);
                 return;
             }
         }
-
+        //        bootstrap.withFiltersSource(new HttpFiltersSourceAdapter() {
+        //            public HttpFilters filterRequest(HttpRequest originalRequest, ChannelHandlerContext ctx) {
+        //                return new HttpFiltersAdapter(originalRequest) {
+        //                    @Override
+        //                    public HttpResponse clientToProxyRequest(HttpObject httpObject) {
+        //                        LOG.info(httpObject.toString());
+        //                        // TODO: implement your filtering here
+        //                        return null;
+        //                    }
+        //
+        //                };
+        //            }
+        //        });
+        bootstrap.withChainProxyManager(new ChainedProxyManagerTongDun());
         System.out.println("About to start...");
         bootstrap.start();
     }
 
-    private static void printHelp(final Options options,
-            final String errorMessage) {
+    private static void printHelp(final Options options, final String errorMessage) {
         if (!StringUtils.isBlank(errorMessage)) {
             LOG.error(errorMessage);
             System.err.println(errorMessage);
@@ -136,8 +130,7 @@ public class Launcher {
     private static void pollLog4JConfigurationFileIfAvailable() {
         File log4jConfigurationFile = new File("src/test/resources/log4j.xml");
         if (log4jConfigurationFile.exists()) {
-            DOMConfigurator.configureAndWatch(
-                    log4jConfigurationFile.getAbsolutePath(), 15);
+            DOMConfigurator.configureAndWatch(log4jConfigurationFile.getAbsolutePath(), 15);
         }
     }
 }
