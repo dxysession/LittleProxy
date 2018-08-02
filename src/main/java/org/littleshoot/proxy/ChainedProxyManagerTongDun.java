@@ -11,7 +11,7 @@ import java.util.Queue;
 public class ChainedProxyManagerTongDun implements ChainedProxyManager {
     @Override
     public void lookupChainedProxies(HttpRequest httpRequest, Queue<ChainedProxy> chainedProxies) {
-        ChainedProxy chainedProxy = new ChainedProxyAdapterTongdun();
+        ChainedProxy chainedProxy = new ChainedProxyAdapterTongDun();
         chainedProxies.add(chainedProxy);
     }
 }

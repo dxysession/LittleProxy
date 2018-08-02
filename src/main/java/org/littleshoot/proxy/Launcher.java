@@ -6,6 +6,7 @@ import org.apache.log4j.xml.DOMConfigurator;
 import org.littleshoot.proxy.extras.SelfSignedMitmManager;
 import org.littleshoot.proxy.impl.DefaultHttpProxyServer;
 import org.littleshoot.proxy.impl.ProxyUtils;
+import org.littleshoot.proxy.impl.ThreadPoolConfiguration;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,16 +76,12 @@ public class Launcher {
         }
 
         System.out.println("About to start server on port: " + port);
-        HttpProxyServerBootstrap bootstrap = DefaultHttpProxyServer.bootstrapFromFile("./littleproxy.properties")
-                        .withPort(port).withAllowLocalOnly(false);
+        HttpProxyServerBootstrap bootstrap = DefaultHttpProxyServer.bootstrapFromFile("./littleproxy.properties");
 
         if (cmd.hasOption(OPTION_NIC)) {
             final String val = cmd.getOptionValue(OPTION_NIC);
             bootstrap.withNetworkInterface(new InetSocketAddress(val, 0));
         }
-
-        System.out.println("Running as Man in the Middle");
-        bootstrap.withManInTheMiddle(new SelfSignedMitmManager());
 
         if (cmd.hasOption(OPTION_DNSSEC)) {
             final String val = cmd.getOptionValue(OPTION_DNSSEC);
@@ -99,22 +96,29 @@ public class Launcher {
                 return;
             }
         }
-        //        bootstrap.withFiltersSource(new HttpFiltersSourceAdapter() {
-        //            public HttpFilters filterRequest(HttpRequest originalRequest, ChannelHandlerContext ctx) {
-        //                return new HttpFiltersAdapter(originalRequest) {
-        //                    @Override
-        //                    public HttpResponse clientToProxyRequest(HttpObject httpObject) {
-        //                        LOG.info(httpObject.toString());
-        //                        // TODO: implement your filtering here
-        //                        return null;
-        //                    }
-        //
-        //                };
-        //            }
-        //        });
+
+        bootstrap.withName("TongDunProxy");
+        bootstrap.withPort(port);
+        bootstrap.withAllowLocalOnly(false);
+        bootstrap.withTransparent(false);//Transparent
+        bootstrap.withAllowRequestToOriginServer(true);
+
+        ThreadPoolConfiguration threadPoolConfiguration = new ThreadPoolConfiguration();
+        threadPoolConfiguration.withAcceptorThreads(8);
+        threadPoolConfiguration.withClientToProxyWorkerThreads(96);
+        threadPoolConfiguration.withProxyToServerWorkerThreads(384);
+        LOG.info("添加线程池配置");
+        bootstrap.withThreadPoolConfiguration(threadPoolConfiguration);
+        LOG.info("添加请求超时限制");
+        bootstrap.withConnectTimeout(15000);
+        bootstrap.withIdleConnectionTimeout(70);
+        LOG.info("添加MITM中间人");
+        bootstrap.withManInTheMiddle(new SelfSignedMitmManager());
+        LOG.info("添加代理链");
         bootstrap.withChainProxyManager(new ChainedProxyManagerTongDun());
         System.out.println("About to start...");
         bootstrap.start();
+        LOG.info("启动成功");
     }
 
     private static void printHelp(final Options options, final String errorMessage) {

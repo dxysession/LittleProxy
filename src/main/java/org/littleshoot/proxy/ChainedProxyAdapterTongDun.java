@@ -15,12 +15,12 @@ import java.net.InetSocketAddress;
  * Created by dxy on 2018/8/1.
  */
 
-public class ChainedProxyAdapterTongdun extends ChainedProxyAdapter {
-    private static final Logger LOG = LoggerFactory.getLogger(ChainedProxyAdapterTongdun.class);
+public class ChainedProxyAdapterTongDun extends ChainedProxyAdapter {
+    private static final Logger LOG = LoggerFactory.getLogger(ChainedProxyAdapterTongDun.class);
     private InetSocketAddress remoteAddress;
     private String ZDY_URI;
 
-    ChainedProxyAdapterTongdun() {
+    ChainedProxyAdapterTongDun() {
         this.remoteAddress = null;
         this.ZDY_URI = "http://10.9.123.200:8088/get";
 //        this.ZDY_URI = "http://123.59.136.87:6800/get";
