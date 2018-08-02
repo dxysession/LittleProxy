@@ -22,8 +22,8 @@ public class ChainedProxyAdapterTongDun extends ChainedProxyAdapter {
 
     ChainedProxyAdapterTongDun() {
         this.remoteAddress = null;
-        this.ZDY_URI = "http://10.9.123.200:8088/get";
-//        this.ZDY_URI = "http://123.59.136.87:6800/get";
+        this.ZDY_URI = "http://10.9.123.200:8088/get?task_name=littleproxy";
+//        this.ZDY_URI = "http://123.59.136.87:6800/get?task_name=littleproxy_local";
     }
 
     @Override
