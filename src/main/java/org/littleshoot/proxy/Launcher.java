@@ -61,7 +61,7 @@ public class Launcher {
             printHelp(options, null);
             return;
         }
-        final int defaultPort = 8080;
+        final int defaultPort = 9999;
         int port;
         if (cmd.hasOption(OPTION_PORT)) {
             final String val = cmd.getOptionValue(OPTION_PORT);

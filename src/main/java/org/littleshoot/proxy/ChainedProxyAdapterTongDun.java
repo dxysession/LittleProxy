@@ -40,7 +40,7 @@ public class ChainedProxyAdapterTongDun extends ChainedProxyAdapter {
                 response = client.execute(httpGet);
                 HttpEntity entity = response.getEntity();
                 String result = EntityUtils.toString(entity);
-                LOG.info(result);
+//                LOG.info(result);
                 if (!"".equals(result)) {
                     result = result.replace("http://", "");
                 }
