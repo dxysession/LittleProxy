@@ -104,11 +104,12 @@ public class Launcher {
         bootstrap.withAllowRequestToOriginServer(true);
 
         ThreadPoolConfiguration threadPoolConfiguration = new ThreadPoolConfiguration();
-        threadPoolConfiguration.withAcceptorThreads(8);
-        threadPoolConfiguration.withClientToProxyWorkerThreads(96);
-        threadPoolConfiguration.withProxyToServerWorkerThreads(384);
+        threadPoolConfiguration.withAcceptorThreads(16);
+        threadPoolConfiguration.withClientToProxyWorkerThreads(240);
+        threadPoolConfiguration.withProxyToServerWorkerThreads(240);
         LOG.info("添加线程池配置");
         bootstrap.withThreadPoolConfiguration(threadPoolConfiguration);
+        LOG.info("withAcceptorThreads(16),withClientToProxyWorkerThreads(240),withProxyToServerWorkerThreads(240)");
         LOG.info("添加请求超时限制");
         bootstrap.withConnectTimeout(15000);
         bootstrap.withIdleConnectionTimeout(70);
