@@ -7,7 +7,8 @@
         <param value="50MB" name="MaxFileSize"/>
         <layout class="org.apache.log4j.PatternLayout">
             <param value="%-6r %d{ISO8601} %-5p [%t] %c{2} (%F:%L).%M() - %m%n" name="ConversionPattern"/>
-        </layout>    </appender>
+        </layout>
+    </appender>
     <appender class="org.apache.log4j.ConsoleAppender" name="stdout">
         <layout class="org.apache.log4j.PatternLayout">
             <param value="%-6r %d{ISO8601} %-5p [%t] %c{2} (%F:%L).%M() - %m%n" name="ConversionPattern"/>
