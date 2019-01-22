@@ -11,8 +11,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
+import java.util.Properties;
 
 /**
  * Launches a new HTTP proxy.
@@ -31,6 +34,20 @@ public class Launcher {
 
     private static final String OPTION_NIC = "nic";
 
+    private static int myDefaultPort;
+
+    private static int withAcceptorThreads;
+
+    private static int withClientToProxyWorkerThreads;
+
+    private static int withProxyToServerWorkerThreads;
+
+    private static int withConnectTimeout;
+
+    private static int withIdleConnectionTimeout;
+
+    public static String ZDY_URI;
+
     /**
      * Starts the proxy from the command line.
      *
@@ -38,6 +55,7 @@ public class Launcher {
      */
     public static void main(final String... args) {
         pollLog4JConfigurationFileIfAvailable();
+        initParam();
         LOG.info("Running LittleProxy with args: {}", Arrays.asList(args));
         final Options options = new Options();
         options.addOption(null, OPTION_DNSSEC, true, "Request and verify DNSSEC signatures.");
@@ -61,7 +79,7 @@ public class Launcher {
             printHelp(options, null);
             return;
         }
-        final int defaultPort = 9999;
+        final int defaultPort = myDefaultPort;
         int port;
         if (cmd.hasOption(OPTION_PORT)) {
             final String val = cmd.getOptionValue(OPTION_PORT);
@@ -104,15 +122,14 @@ public class Launcher {
         bootstrap.withAllowRequestToOriginServer(true);
 
         ThreadPoolConfiguration threadPoolConfiguration = new ThreadPoolConfiguration();
-        threadPoolConfiguration.withAcceptorThreads(16);
-        threadPoolConfiguration.withClientToProxyWorkerThreads(240);
-        threadPoolConfiguration.withProxyToServerWorkerThreads(240);
+        threadPoolConfiguration.withAcceptorThreads(withAcceptorThreads);
+        threadPoolConfiguration.withClientToProxyWorkerThreads(withClientToProxyWorkerThreads);
+        threadPoolConfiguration.withProxyToServerWorkerThreads(withProxyToServerWorkerThreads);
         LOG.info("添加线程池配置");
         bootstrap.withThreadPoolConfiguration(threadPoolConfiguration);
-        LOG.info("withAcceptorThreads(16),withClientToProxyWorkerThreads(240),withProxyToServerWorkerThreads(240)");
         LOG.info("添加请求超时限制");
-        bootstrap.withConnectTimeout(15000);
-        bootstrap.withIdleConnectionTimeout(70);
+        bootstrap.withConnectTimeout(withConnectTimeout);
+        bootstrap.withIdleConnectionTimeout(withIdleConnectionTimeout);
         LOG.info("添加MITM中间人");
         bootstrap.withManInTheMiddle(new SelfSignedMitmManager());
         LOG.info("添加代理链");
@@ -137,6 +154,25 @@ public class Launcher {
         File log4jConfigurationFile = new File("log4j.xml");
         if (log4jConfigurationFile.exists()) {
             DOMConfigurator.configureAndWatch(log4jConfigurationFile.getAbsolutePath(), 15);
+        }
+    }
+
+    private static void initParam() {
+        try {
+            LOG.info("从文件初始化参数");
+            InputStream inStream = new FileInputStream(new File("setting.properties"));
+            Properties prop = new Properties();
+            prop.load(inStream);
+            myDefaultPort = Integer.parseInt(prop.getProperty("port"));
+            withAcceptorThreads = Integer.parseInt(prop.getProperty("withAcceptorThreads"));
+            withClientToProxyWorkerThreads = Integer.parseInt(prop.getProperty("withClientToProxyWorkerThreads"));
+            withProxyToServerWorkerThreads = Integer.parseInt(prop.getProperty("withProxyToServerWorkerThreads"));
+            withConnectTimeout = Integer.parseInt(prop.getProperty("withConnectTimeout"));
+            withIdleConnectionTimeout = Integer.parseInt(prop.getProperty("withIdleConnectionTimeout"));
+            ZDY_URI = prop.getProperty("ZDY_URI");
+        }
+        catch (Exception e){
+            LOG.error(e.toString());
         }
     }
 }

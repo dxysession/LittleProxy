@@ -10,7 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
-
 /**
  * Created by dxy on 2018/8/1.
  */
@@ -22,7 +21,8 @@ public class ChainedProxyAdapterTongDun extends ChainedProxyAdapter {
 
     ChainedProxyAdapterTongDun() {
         this.remoteAddress = null;
-        this.ZDY_URI = "http://10.9.123.200:8088/get?task_name=littleproxy";
+        this.ZDY_URI = Launcher.ZDY_URI;
+//        this.ZDY_URI = "http://10.9.123.200:8088/get?task_name=littleproxy";
 //        this.ZDY_URI = "http://123.59.136.87:6800/get?task_name=littleproxy_local";
     }
 
