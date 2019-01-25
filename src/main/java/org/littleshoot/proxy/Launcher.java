@@ -46,7 +46,7 @@ public class Launcher {
 
     private static int withIdleConnectionTimeout;
 
-    public static String ZDY_URI;
+    public static String ZDY_ALL_URI;
 
     /**
      * Starts the proxy from the command line.
@@ -169,9 +169,8 @@ public class Launcher {
             withProxyToServerWorkerThreads = Integer.parseInt(prop.getProperty("withProxyToServerWorkerThreads"));
             withConnectTimeout = Integer.parseInt(prop.getProperty("withConnectTimeout"));
             withIdleConnectionTimeout = Integer.parseInt(prop.getProperty("withIdleConnectionTimeout"));
-            ZDY_URI = prop.getProperty("ZDY_URI");
-        }
-        catch (Exception e){
+            ZDY_ALL_URI = prop.getProperty("ZDY_ALL_URI");
+        } catch (Exception e) {
             LOG.error(e.toString());
         }
     }

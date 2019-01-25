@@ -17,3 +17,4 @@ LittleProxy.pro
 *.jks
 performance/site/
 classes/
+log4j.xml
